@@ -13,12 +13,14 @@ class _TambahKontakPageState extends State<TambahKontakPage> {
   final namaController = TextEditingController();
   final emailController = TextEditingController();
   final hpController = TextEditingController();
+  final kategoriController = TextEditingController();
 
   @override
   void dispose() {
     namaController.dispose();
     emailController.dispose();
     hpController.dispose();
+    kategoriController.dispose();
     super.dispose();
   }
 
@@ -28,8 +30,10 @@ class _TambahKontakPageState extends State<TambahKontakPage> {
         nama: namaController.text,
         email: emailController.text,
         noHp: hpController.text,
+        kategori: kategoriController.text.isEmpty
+            ? null
+            : kategoriController.text,
       );
-      // Kembali ke halaman Kontak sambil membawa data kontak baru
       Navigator.pop(context, kontakBaru);
     }
   }
@@ -74,6 +78,14 @@ class _TambahKontakPageState extends State<TambahKontakPage> {
                 keyboardType: TextInputType.phone,
                 validator: (value) =>
                     (value == null || value.isEmpty) ? 'No. HP wajib diisi' : null,
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: kategoriController,
+                decoration: const InputDecoration(
+                  labelText: 'Kategori (opsional: Keluarga/Teman/Kerja)',
+                  border: OutlineInputBorder(),
+                ),
               ),
               const SizedBox(height: 24),
               SizedBox(
