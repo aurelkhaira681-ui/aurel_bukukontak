@@ -48,16 +48,23 @@ class _TambahKontakPageState extends State<TambahKontakPage> {
           key: _formKey,
           child: Column(
             children: [
+              // Nama - wajib diisi
               TextFormField(
                 controller: namaController,
                 decoration: const InputDecoration(
                   labelText: 'Nama Lengkap',
                   border: OutlineInputBorder(),
                 ),
-                validator: (value) =>
-                    (value == null || value.isEmpty) ? 'Nama wajib diisi' : null,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Nama wajib diisi';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 12),
+
+              // Email - wajib diisi dan harus mengandung '@'
               TextFormField(
                 controller: emailController,
                 decoration: const InputDecoration(
@@ -65,10 +72,19 @@ class _TambahKontakPageState extends State<TambahKontakPage> {
                   border: OutlineInputBorder(),
                 ),
                 keyboardType: TextInputType.emailAddress,
-                validator: (value) =>
-                    (value == null || value.isEmpty) ? 'Email wajib diisi' : null,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Email wajib diisi';
+                  }
+                  if (!value.contains('@')) {
+                    return 'Email harus mengandung karakter "@"';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 12),
+
+              // No HP - hanya angka, minimal 10 digit
               TextFormField(
                 controller: hpController,
                 decoration: const InputDecoration(
@@ -76,10 +92,23 @@ class _TambahKontakPageState extends State<TambahKontakPage> {
                   border: OutlineInputBorder(),
                 ),
                 keyboardType: TextInputType.phone,
-                validator: (value) =>
-                    (value == null || value.isEmpty) ? 'No. HP wajib diisi' : null,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'No. HP wajib diisi';
+                  }
+                  final hanyaAngka = RegExp(r'^[0-9]+$');
+                  if (!hanyaAngka.hasMatch(value)) {
+                    return 'No. HP hanya boleh berisi angka';
+                  }
+                  if (value.length < 10) {
+                    return 'No. HP minimal 10 digit';
+                  }
+                  return null;
+                },
               ),
               const SizedBox(height: 12),
+
+              // Kategori - opsional, tanpa validator
               TextFormField(
                 controller: kategoriController,
                 decoration: const InputDecoration(
@@ -88,6 +117,7 @@ class _TambahKontakPageState extends State<TambahKontakPage> {
                 ),
               ),
               const SizedBox(height: 24),
+
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
