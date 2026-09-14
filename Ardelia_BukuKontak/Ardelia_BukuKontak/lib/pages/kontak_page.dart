@@ -3,8 +3,43 @@ import '../models/kontak.dart';
 
 class KontakPage extends StatelessWidget {
   final List<Kontak> kontakList;
+  final void Function(Kontak kontak) onEdit;
+  final void Function(Kontak kontak) onDelete;
 
-  const KontakPage({super.key, required this.kontakList});
+  const KontakPage({
+    super.key,
+    required this.kontakList,
+    required this.onEdit,
+    required this.onDelete,
+  });
+
+  // KETENTUAN B: tombol Delete harus menampilkan dialog konfirmasi
+  // dengan pilihan Batal / Hapus. Hanya memanggil onDelete jika user
+  // benar-benar memilih "Hapus".
+  Future<void> _konfirmasiHapus(BuildContext context, Kontak kontak) async {
+    final yakin = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Hapus Kontak'),
+        content: Text('Yakin ingin menghapus "${kontak.nama}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Batal'),
+          ),
+          FilledButton.tonal(
+            style: FilledButton.styleFrom(foregroundColor: Colors.red),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Hapus'),
+          ),
+        ],
+      ),
+    );
+
+    if (yakin == true) {
+      onDelete(kontak);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,6 +67,21 @@ class KontakPage extends StatelessWidget {
               '${kontak.email}\n${kontak.noHp}\nKategori: ${kontak.kategori ?? "Tanpa kategori"}',
             ),
             isThreeLine: true,
+            trailing: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.edit, color: Colors.indigo),
+                  tooltip: 'Edit',
+                  onPressed: () => onEdit(kontak),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.delete, color: Colors.red),
+                  tooltip: 'Hapus',
+                  onPressed: () => _konfirmasiHapus(context, kontak),
+                ),
+              ],
+            ),
           ),
         );
       },

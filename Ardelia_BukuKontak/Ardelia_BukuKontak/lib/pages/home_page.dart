@@ -47,6 +47,45 @@ class _HomePageState extends State<HomePage>
     }
   }
 
+  // ---------------- EDIT KONTAK ----------------
+  Future<void> _editKontak(Kontak kontakLama) async {
+    final hasil = await Navigator.push<Kontak>(
+      context,
+      MaterialPageRoute(
+        builder: (context) => TambahKontakPage(kontakLama: kontakLama),
+      ),
+    );
+
+    if (hasil != null) {
+      setState(() {
+        // Cari berdasarkan id (bukan index), supaya kontak yang benar yang
+        // ter-update walaupun daftar sedang tersaring oleh pencarian.
+        final index = _kontakList.indexWhere((k) => k.id == kontakLama.id);
+        if (index != -1) {
+          _kontakList[index] = hasil;
+        }
+      });
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Kontak berhasil diperbarui')),
+      );
+    }
+  }
+
+  // ---------------- DELETE KONTAK ----------------
+  void _hapusKontak(Kontak kontak) {
+    setState(() {
+      // Hapus berdasarkan id, memastikan kontak yang dipilih (termasuk saat
+      // sedang dalam hasil pencarian) yang benar-benar terhapus.
+      _kontakList.removeWhere((k) => k.id == kontak.id);
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Kontak "${kontak.nama}" telah dihapus')),
+    );
+  }
+
   void _pilihMenuDrawer(String menu) {
     Navigator.pop(context);
 
@@ -99,7 +138,15 @@ class _HomePageState extends State<HomePage>
                       return namaCocok || kategoriCocok;
                     }).toList();
 
-              return KontakPage(kontakList: filteredList);
+              // filteredList hanya memengaruhi TAMPILAN. onEdit/onDelete
+              // tetap beroperasi pada _kontakList asli lewat pencocokan id
+              // di _editKontak/_hapusKontak, jadi kontak yang benar yang
+              // ter-update/terhapus walau sedang dalam kondisi tersaring.
+              return KontakPage(
+                kontakList: filteredList,
+                onEdit: _editKontak,
+                onDelete: _hapusKontak,
+              );
             },
           ),
         ),

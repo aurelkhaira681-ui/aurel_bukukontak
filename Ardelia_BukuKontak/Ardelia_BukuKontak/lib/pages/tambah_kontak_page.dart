@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import '../models/kontak.dart';
 
 class TambahKontakPage extends StatefulWidget {
-  const TambahKontakPage({super.key});
+  // Jika kontakLama diisi -> halaman ini berfungsi sebagai form EDIT
+  // (form otomatis terisi data lama). Jika null -> form TAMBAH biasa.
+  final Kontak? kontakLama;
+
+  const TambahKontakPage({super.key, this.kontakLama});
 
   @override
   State<TambahKontakPage> createState() => _TambahKontakPageState();
@@ -10,10 +14,23 @@ class TambahKontakPage extends StatefulWidget {
 
 class _TambahKontakPageState extends State<TambahKontakPage> {
   final _formKey = GlobalKey<FormState>();
-  final namaController = TextEditingController();
-  final emailController = TextEditingController();
-  final hpController = TextEditingController();
-  final kategoriController = TextEditingController();
+  late final TextEditingController namaController;
+  late final TextEditingController emailController;
+  late final TextEditingController hpController;
+  late final TextEditingController kategoriController;
+
+  bool get _isEdit => widget.kontakLama != null;
+
+  @override
+  void initState() {
+    super.initState();
+    // Form Edit harus menampilkan data kontak yang sebelumnya sudah tersimpan.
+    final k = widget.kontakLama;
+    namaController = TextEditingController(text: k?.nama ?? '');
+    emailController = TextEditingController(text: k?.email ?? '');
+    hpController = TextEditingController(text: k?.noHp ?? '');
+    kategoriController = TextEditingController(text: k?.kategori ?? '');
+  }
 
   @override
   void dispose() {
@@ -26,7 +43,10 @@ class _TambahKontakPageState extends State<TambahKontakPage> {
 
   void _simpanKontak() {
     if (_formKey.currentState!.validate()) {
-      final kontakBaru = Kontak(
+      final kontakHasil = Kontak(
+        // Pertahankan id lama saat edit, supaya kontak yang diperbarui
+        // adalah kontak yang sama persis (bukan dianggap kontak baru).
+        id: widget.kontakLama?.id,
         nama: namaController.text,
         email: emailController.text,
         noHp: hpController.text,
@@ -34,19 +54,19 @@ class _TambahKontakPageState extends State<TambahKontakPage> {
             ? null
             : kategoriController.text,
       );
-      Navigator.pop(context, kontakBaru);
+      Navigator.pop(context, kontakHasil);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Tambah Kontak')),
+      appBar: AppBar(title: Text(_isEdit ? 'Edit Kontak' : 'Tambah Kontak')),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
           key: _formKey,
-          child: Column(
+          child: ListView(
             children: [
               // Nama - wajib diisi
               TextFormField(
@@ -122,9 +142,9 @@ class _TambahKontakPageState extends State<TambahKontakPage> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: _simpanKontak,
-                  child: const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 12),
-                    child: Text('Simpan'),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    child: Text(_isEdit ? 'Simpan Perubahan' : 'Simpan'),
                   ),
                 ),
               ),
